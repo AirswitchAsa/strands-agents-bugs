@@ -5,3 +5,4 @@ __pycache__
 .cache
 .ruff_cache
 .uv-cache
+*.jsonl
