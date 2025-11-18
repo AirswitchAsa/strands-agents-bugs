@@ -1,17 +1,24 @@
 import asyncio
 import json
+import os
 import random
 import types
 from collections.abc import Awaitable, Callable
 from typing import Any
 
 from strands import Agent, tool
+from strands.models.gemini import GeminiModel
 
 from strands_agents_bugs.env import load_env
 
 
 if not load_env():
     raise OSError("Failed to load environment variables")
+
+model: GeminiModel = GeminiModel(
+    client_args={"api_key": os.getenv("GOOGLE_AI_API_KEY")},
+    model_id="gemini-2.5-flash",
+)
 
 
 @tool
@@ -50,9 +57,9 @@ def make_tool(
     return tool(tool_func)
 
 
-agent_1 = Agent(tools=[call_api], callback_handler=None, name="normal_agent")
+agent_1 = Agent(tools=[call_api], model=model, callback_handler=None, name="normal_agent")
 tool_2 = make_tool("call_api")
-agent_2 = Agent(tools=[tool_2], callback_handler=None, name="duplicate_agent")
+agent_2 = Agent(tools=[tool_2], model=model, callback_handler=None, name="duplicate_agent")
 
 
 def _json_default(obj: object) -> object:
@@ -82,5 +89,5 @@ async def process_streaming_response(agent: Agent) -> None:
 
 
 def main() -> None:
-    # asyncio.run(process_streaming_response(agent_1))
+    asyncio.run(process_streaming_response(agent_1))
     asyncio.run(process_streaming_response(agent_2))
