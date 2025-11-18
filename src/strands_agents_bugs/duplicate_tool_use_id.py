@@ -29,9 +29,9 @@ def make_tool(
 
     async def tool_impl() -> dict[str, Any]:
         """Call API asynchronously."""
-        await asyncio.sleep(3)  # simulated api call
 
-        return await call_api()
+        await asyncio.sleep(3)  # simulated api call
+        return f"API result: {random.randint(1, 1000)}"
 
     # Create a new function with the correct name before applying the decorator
     tool_func = types.FunctionType(
@@ -51,7 +51,8 @@ def make_tool(
 
 
 agent_1 = Agent(tools=[call_api], callback_handler=None, name="normal_agent")
-agent_2 = Agent(tools=[make_tool("call_api")], callback_handler=None, name="duplicate_agent")
+tool_2 = make_tool("call_api")
+agent_2 = Agent(tools=[tool_2], callback_handler=None, name="duplicate_agent")
 
 
 def _json_default(obj: object) -> object:
@@ -73,12 +74,13 @@ def _write_events_to_file(agent_name: str, events: list[dict]) -> None:
 async def process_streaming_response(agent: Agent) -> None:
     agent_stream = agent.stream_async("Can you call my API twice?")
     events: list[dict] = []
+    print(f"Starting to stream events for {agent.name}")
     async for event in agent_stream:
         events.append(event)
-
+    print(f"Finished streaming events for {agent.name}")
     await asyncio.to_thread(_write_events_to_file, agent.name, events)
 
 
 def main() -> None:
-    asyncio.run(process_streaming_response(agent_1))
+    # asyncio.run(process_streaming_response(agent_1))
     asyncio.run(process_streaming_response(agent_2))
