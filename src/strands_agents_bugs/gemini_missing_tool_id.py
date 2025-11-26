@@ -37,22 +37,17 @@ def _json_default(obj: object) -> object:
     return str(obj)
 
 
-def _write_events_to_file(agent_name: str, events: list[dict]) -> None:
-    with open(f"agent_stream_events_{agent_name}.jsonl", "w") as f:
-        for event in events:
-            f.write(json.dumps(event, default=_json_default))
-            f.write("\n")
-
-
 # Async function that iterators over streamed agent events
 async def process_streaming_response(agent: Agent) -> None:
     agent_stream = agent.stream_async("Can you call my API twice?")
     events: list[dict] = []
     print(f"Starting to stream events for {agent.name}")
-    async for event in agent_stream:
-        events.append(event)
+    with open(f"agent_stream_events_{agent.name}.jsonl", "w") as f:  # noqa
+        async for event in agent_stream:
+            events.append(event)
+            f.write(json.dumps(event, default=_json_default))
+            f.write("\n")
     print(f"Finished streaming events for {agent.name}")
-    await asyncio.to_thread(_write_events_to_file, agent.name, events)
 
 
 def main() -> None:

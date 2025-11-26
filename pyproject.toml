@@ -20,4 +20,4 @@ build-backend = "hatchling.build"
 packages = ["src/strands_agents_bugs"]
 
 [project.scripts]
-duplicate_tool_use_id = "strands_agents_bugs.duplicate_tool_use_id:main"
+gemini_missing_tool_id = "strands_agents_bugs.gemini_missing_tool_id:main"
